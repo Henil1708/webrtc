@@ -17,6 +17,7 @@ const VideoCall = ({
   videoMediaDevices,
   onEndCall,
   remoteVideoStream,
+  peerConnection,
 }) => {
   const localVideoRef = useRef(null);
 
@@ -31,6 +32,8 @@ const VideoCall = ({
 
   const [showAudioSelector, setShowAudioSelector] = useState(false);
   const [showVideoSelector, setShowVideoSelector] = useState(false);
+
+  const [localVideoStream, setLocalVideoStream] = useState(null);
 
   const toggleMic = () => setIsMicOn(!isMicOn);
   const toggleVideo = () => setIsVideoOn(!isVideoOn);
@@ -61,6 +64,34 @@ const VideoCall = ({
       remoteVideoRef.current.srcObject = remoteVideoStream;
     }
   }, [remoteVideoStream, remoteVideoRef]);
+
+  const handleGetMediaStreamsAndSendToPeerConnections = async () => {
+    if (peerConnection) {
+      console.log(peerConnection);
+      const localStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: {
+          echoCancellation: true,
+        },
+      });
+
+      localStream
+        .getTracks()
+        .forEach((track) => peerConnection.addTrack(track, localStream));
+
+      setLocalVideoStream(localStream[0]);
+    }
+  };
+
+  useEffect(() => {
+    if (!localVideoStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localVideoStream;
+    }
+  }, [localVideoStream, localVideoRef]);
+
+  useEffect(() => {
+    handleGetMediaStreamsAndSendToPeerConnections();
+  }, []);
 
   return (
     <div className="video-call-container">

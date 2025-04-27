@@ -398,6 +398,7 @@ const RoomPage = ({ caller, onEndCall }) => {
           mediaPermissions={mediaPermissions}
           remoteVideoStream={remoteStream}
           localVideoRef={localVideo}
+          peerConnection={peerConnectionRef.current}
         />
       )}
     </RoomLayout>
